@@ -1,0 +1,195 @@
+name: nova-ai-calling-assistant
+
+x-backend-env: &backend-env
+  APP_ENV: ${APP_ENV:-development}
+  APP_NAME: ${APP_NAME:-Khair IT Solution}
+  SECRET_KEY: ${SECRET_KEY:-local-dev-secret-change-before-production-6d3b773598b24fdf}
+  ENCRYPTION_KEY: ${ENCRYPTION_KEY:-gx2_yR_ywzViWFPN9AisjVRFN-ZUCIn04iIn8V3y8qQ=}
+  DATABASE_URL: ${DATABASE_URL:-postgresql+psycopg://nova:nova_local_password@postgres:5432/nova}
+  REDIS_URL: ${REDIS_URL:-redis://redis:6379/0}
+  CELERY_BROKER_URL: ${CELERY_BROKER_URL:-redis://redis:6379/1}
+  CELERY_RESULT_BACKEND: ${CELERY_RESULT_BACKEND:-redis://redis:6379/2}
+  PUBLIC_BASE_URL: ${PUBLIC_BASE_URL:-http://localhost}
+  FRONTEND_URL: ${FRONTEND_URL:-http://localhost}
+  CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost,http://localhost:5173}
+  DEFAULT_ADMIN_EMAIL: ${DEFAULT_ADMIN_EMAIL:-admin@nova.example.com}
+  DEFAULT_ADMIN_PASSWORD: ${DEFAULT_ADMIN_PASSWORD:-NovaAdmin123!}
+  EMAIL_MODE: ${EMAIL_MODE:-console}
+  SMTP_HOST: ${SMTP_HOST:-}
+  SMTP_PORT: ${SMTP_PORT:-587}
+  SMTP_USERNAME: ${SMTP_USERNAME:-}
+  SMTP_PASSWORD: ${SMTP_PASSWORD:-}
+  SMTP_FROM_EMAIL: ${SMTP_FROM_EMAIL:-noreply@nova.example.com}
+  VOICE_PROVIDER_MODE: ${VOICE_PROVIDER_MODE:-mock}
+  TWILIO_ACCOUNT_SID: ${TWILIO_ACCOUNT_SID:-}
+  TWILIO_AUTH_TOKEN: ${TWILIO_AUTH_TOKEN:-}
+  TWILIO_PHONE_NUMBER: ${TWILIO_PHONE_NUMBER:-}
+  TWILIO_VALIDATE_SIGNATURES: ${TWILIO_VALIDATE_SIGNATURES:-true}
+  OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+  OPENAI_REALTIME_MODEL: ${OPENAI_REALTIME_MODEL:-gpt-realtime}
+  OPENAI_TEXT_MODEL: ${OPENAI_TEXT_MODEL:-gpt-4.1-mini}
+  OPENAI_EMBEDDING_MODEL: ${OPENAI_EMBEDDING_MODEL:-text-embedding-3-small}
+  ELEVENLABS_API_KEY: ${ELEVENLABS_API_KEY:-}
+  OAUTH_GOOGLE_CLIENT_ID: ${OAUTH_GOOGLE_CLIENT_ID:-}
+  OAUTH_GOOGLE_CLIENT_SECRET: ${OAUTH_GOOGLE_CLIENT_SECRET:-}
+  OAUTH_MICROSOFT_CLIENT_ID: ${OAUTH_MICROSOFT_CLIENT_ID:-}
+  OAUTH_MICROSOFT_CLIENT_SECRET: ${OAUTH_MICROSOFT_CLIENT_SECRET:-}
+  OAUTH_SLACK_CLIENT_ID: ${OAUTH_SLACK_CLIENT_ID:-}
+  OAUTH_SLACK_CLIENT_SECRET: ${OAUTH_SLACK_CLIENT_SECRET:-}
+  OAUTH_HUBSPOT_CLIENT_ID: ${OAUTH_HUBSPOT_CLIENT_ID:-}
+  OAUTH_HUBSPOT_CLIENT_SECRET: ${OAUTH_HUBSPOT_CLIENT_SECRET:-}
+  OAUTH_SALESFORCE_CLIENT_ID: ${OAUTH_SALESFORCE_CLIENT_ID:-}
+  OAUTH_SALESFORCE_CLIENT_SECRET: ${OAUTH_SALESFORCE_CLIENT_SECRET:-}
+  LOG_LEVEL: ${LOG_LEVEL:-INFO}
+  RATE_LIMIT_PER_MINUTE: ${RATE_LIMIT_PER_MINUTE:-120}
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-nova}
+      POSTGRES_USER: ${POSTGRES_USER:-nova}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-nova_local_password}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks: [nova]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-nova} -d ${POSTGRES_DB:-nova}"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  redis:
+    image: redis:7.4-alpine
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+    networks: [nova]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  backend:
+    build:
+      context: ./backend
+    restart: unless-stopped
+    environment: *backend-env
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - recordings:/app/recordings
+    networks: [nova]
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:8000/api/v1/health/ready"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+
+  celery:
+    build:
+      context: ./backend
+    restart: unless-stopped
+    command: celery -A app.workers.celery_app:celery_app worker --loglevel=INFO --concurrency=2
+    environment: *backend-env
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - recordings:/app/recordings
+    networks: [nova]
+    healthcheck:
+      test: ["CMD-SHELL", "celery -A app.workers.celery_app:celery_app inspect ping -d celery@$$HOSTNAME | grep -q pong"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  frontend:
+    build:
+      context: ./frontend
+    restart: unless-stopped
+    networks: [nova]
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1/"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  frontend-tooling:
+    build:
+      context: ./frontend
+      target: build
+    profiles: ["tools"]
+    networks: [nova]
+
+  nginx:
+    image: nginx:1.27-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/certs:/etc/nginx/certs:ro
+    depends_on:
+      backend:
+        condition: service_healthy
+      frontend:
+        condition: service_healthy
+    networks: [nova]
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1/healthz"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  prometheus:
+    image: prom/prometheus:v3.5.0
+    restart: unless-stopped
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.path=/prometheus
+      - --web.enable-lifecycle
+    volumes:
+      - ./docker/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    ports:
+      - "9090:9090"
+    networks: [nova]
+    depends_on:
+      backend:
+        condition: service_healthy
+
+  grafana:
+    image: grafana/grafana:12.1.0
+    restart: unless-stopped
+    environment:
+      GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER:-admin}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:-nova_grafana_local}
+      GF_USERS_ALLOW_SIGN_UP: "false"
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./docker/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./docker/grafana/dashboards:/var/lib/grafana/dashboards:ro
+    ports:
+      - "3001:3000"
+    networks: [nova]
+    depends_on: [prometheus]
+
+networks:
+  nova:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  redis_data:
+  recordings:
+  prometheus_data:
+  grafana_data:

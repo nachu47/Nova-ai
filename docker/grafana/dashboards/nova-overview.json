@@ -1,0 +1,16 @@
+{
+  "annotations":{"list":[]},
+  "editable":true,
+  "panels":[
+    {"type":"stat","title":"API Requests","targets":[{"expr":"sum(rate(http_requests_total[5m]))"}],"gridPos":{"h":8,"w":8,"x":0,"y":0}},
+    {"type":"stat","title":"5xx Rate","targets":[{"expr":"sum(rate(http_requests_total{status=~\"5..\"}[5m]))"}],"gridPos":{"h":8,"w":8,"x":8,"y":0}},
+    {"type":"timeseries","title":"Request Latency p95","targets":[{"expr":"histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket[5m])) by (le))"}],"gridPos":{"h":8,"w":8,"x":16,"y":0}}
+  ],
+  "schemaVersion":41,
+  "tags":["nova","fastapi"],
+  "templating":{"list":[]},
+  "time":{"from":"now-6h","to":"now"},
+  "title":"Nova AI Calling Assistant Overview",
+  "uid":"nova-overview",
+  "version":1
+}

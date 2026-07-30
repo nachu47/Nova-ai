@@ -1,0 +1,188 @@
+nova-ai-calling-assistant/
+├── .github/
+│   └── workflows/
+│       └── ci.yml
+├── backend/
+│   ├── alembic/
+│   │   ├── versions/
+│   │   │   └── 0001_initial_schema.py
+│   │   ├── env.py
+│   │   └── script.py.mako
+│   ├── app/
+│   │   ├── api/
+│   │   │   ├── __init__.py
+│   │   │   └── deps.py
+│   │   ├── core/
+│   │   │   ├── __init__.py
+│   │   │   ├── config.py
+│   │   │   ├── logging.py
+│   │   │   └── security.py
+│   │   ├── database/
+│   │   │   ├── __init__.py
+│   │   │   ├── base.py
+│   │   │   ├── bootstrap.py
+│   │   │   └── session.py
+│   │   ├── middleware/
+│   │   │   ├── __init__.py
+│   │   │   ├── rate_limit.py
+│   │   │   ├── request_context.py
+│   │   │   └── security_headers.py
+│   │   ├── models/
+│   │   │   ├── __init__.py
+│   │   │   ├── entities.py
+│   │   │   └── enums.py
+│   │   ├── routers/
+│   │   │   ├── __init__.py
+│   │   │   ├── admin.py
+│   │   │   ├── agents.py
+│   │   │   ├── ai.py
+│   │   │   ├── analytics.py
+│   │   │   ├── auth.py
+│   │   │   ├── calls.py
+│   │   │   ├── crm.py
+│   │   │   ├── health.py
+│   │   │   ├── integrations.py
+│   │   │   ├── notifications.py
+│   │   │   ├── scheduling.py
+│   │   │   ├── users.py
+│   │   │   ├── voice.py
+│   │   │   └── webhooks.py
+│   │   ├── schemas/
+│   │   │   ├── __init__.py
+│   │   │   └── api.py
+│   │   ├── services/
+│   │   │   ├── __init__.py
+│   │   │   ├── audit_service.py
+│   │   │   ├── call_summary_service.py
+│   │   │   ├── email_service.py
+│   │   │   ├── integration_service.py
+│   │   │   ├── knowledge_service.py
+│   │   │   ├── memory_service.py
+│   │   │   ├── notification_service.py
+│   │   │   ├── openai_service.py
+│   │   │   ├── realtime_service.py
+│   │   │   ├── tool_service.py
+│   │   │   ├── twilio_service.py
+│   │   │   ├── usage_service.py
+│   │   │   └── webhook_service.py
+│   │   ├── utils/
+│   │   │   ├── __init__.py
+│   │   │   └── network.py
+│   │   ├── workers/
+│   │   │   ├── __init__.py
+│   │   │   ├── celery_app.py
+│   │   │   └── tasks.py
+│   │   ├── __init__.py
+│   │   └── main.py
+│   ├── tests/
+│   │   ├── conftest.py
+│   │   ├── test_agents_crm.py
+│   │   ├── test_auth.py
+│   │   ├── test_health.py
+│   │   └── test_security.py
+│   ├── .dockerignore
+│   ├── alembic.ini
+│   ├── Dockerfile
+│   ├── entrypoint.sh
+│   ├── pyproject.toml
+│   ├── pytest.ini
+│   └── requirements.txt
+├── docker/
+│   ├── grafana/
+│   │   ├── dashboards/
+│   │   │   └── nova-overview.json
+│   │   └── provisioning/
+│   │       ├── dashboards/
+│   │       │   └── dashboard.yml
+│   │       └── datasources/
+│   │           └── prometheus.yml
+│   └── prometheus.yml
+├── docs/
+│   ├── api.md
+│   ├── architecture.md
+│   ├── database.md
+│   ├── deployment.md
+│   ├── installation.md
+│   └── security.md
+├── frontend/
+│   ├── src/
+│   │   ├── components/
+│   │   │   ├── ui/
+│   │   │   │   ├── badge.tsx
+│   │   │   │   ├── button.tsx
+│   │   │   │   ├── card.tsx
+│   │   │   │   ├── input.tsx
+│   │   │   │   └── table.tsx
+│   │   │   ├── ProtectedRoute.tsx
+│   │   │   └── StatCard.tsx
+│   │   ├── contexts/
+│   │   │   ├── AuthContext.tsx
+│   │   │   └── ThemeContext.tsx
+│   │   ├── hooks/
+│   │   │   └── useApi.ts
+│   │   ├── layouts/
+│   │   │   └── AppLayout.tsx
+│   │   ├── lib/
+│   │   │   └── utils.ts
+│   │   ├── pages/
+│   │   │   ├── AdminPage.tsx
+│   │   │   ├── AgentsPage.tsx
+│   │   │   ├── AnalyticsPage.tsx
+│   │   │   ├── CallsPage.tsx
+│   │   │   ├── CRMPage.tsx
+│   │   │   ├── DashboardPage.tsx
+│   │   │   ├── ForgotPasswordPage.tsx
+│   │   │   ├── IntegrationsPage.tsx
+│   │   │   ├── KnowledgePage.tsx
+│   │   │   ├── LoginPage.tsx
+│   │   │   ├── NotFoundPage.tsx
+│   │   │   ├── RegisterPage.tsx
+│   │   │   ├── ResetPasswordPage.tsx
+│   │   │   ├── SchedulingPage.tsx
+│   │   │   ├── SettingsPage.tsx
+│   │   │   └── VerifyEmailPage.tsx
+│   │   ├── services/
+│   │   │   └── api.ts
+│   │   ├── test/
+│   │   │   └── setup.ts
+│   │   ├── types/
+│   │   │   └── index.ts
+│   │   ├── App.tsx
+│   │   ├── index.css
+│   │   └── main.tsx
+│   ├── tests/
+│   │   └── LoginPage.test.tsx
+│   ├── .dockerignore
+│   ├── components.json
+│   ├── Dockerfile
+│   ├── eslint.config.js
+│   ├── index.html
+│   ├── nginx.conf
+│   ├── package.json
+│   ├── postcss.config.js
+│   ├── tailwind.config.ts
+│   ├── tsconfig.app.json
+│   ├── tsconfig.json
+│   ├── tsconfig.node.json
+│   ├── vite.config.ts
+│   └── vitest.config.ts
+├── nginx/
+│   ├── certs/
+│   │   └── .gitkeep
+│   ├── nginx.conf
+│   └── nginx.tls.conf
+├── scripts/
+│   ├── check.sh
+│   └── generate_secrets.py
+├── tests/
+│   ├── README.md
+│   └── smoke.sh
+├── .env.example
+├── .gitignore
+├── docker-compose.tls.yml
+├── docker-compose.yml
+├── LICENSE
+├── Makefile
+├── README.md
+├── REPOSITORY_TREE.txt
+└── VALIDATION_REPORT.md

@@ -1,0 +1,5 @@
+def test_agent_contact_and_mock_call(client,auth_headers):
+    agent=client.post('/api/v1/agents',headers=auth_headers,json={"name":"Sales Agent","description":"Qualification","system_prompt":"You are a professional sales qualification assistant. Confirm every important detail and respect opt-outs.","greeting":"Hello, this is the sales assistant."});assert agent.status_code==201,agent.text
+    contact=client.post('/api/v1/crm/contacts',headers=auth_headers,json={"first_name":"Alan","last_name":"Turing","email":"alan@example.com","phone":"+442079460001","timezone":"Europe/London","tags":["lead"]});assert contact.status_code==201,contact.text
+    call=client.post('/api/v1/calls/outbound',headers=auth_headers,json={"agent_id":agent.json()['id'],"contact_id":contact.json()['id'],"to_number":"+442079460001","context":{"campaign":"demo"},"revenue":"25.00"});assert call.status_code==201,call.text;assert call.json()['provider']=='mock'
+    completed=client.post(f"/api/v1/calls/{call.json()['id']}/simulate",headers=auth_headers);assert completed.status_code==200;assert completed.json()['status']=='completed'

@@ -1,0 +1,7 @@
+export type User={id:string;organization_id:string;email:string;full_name:string;role:'owner'|'admin'|'member'|'viewer';is_active:boolean;is_verified:boolean;preferences:Record<string,unknown>;created_at:string}
+export type Agent={id:string;name:string;description:string;system_prompt:string;greeting:string;voice:string;language:string;provider:string;model:string;temperature:number;max_call_seconds:number;silence_timeout_seconds:number;tools:string[];schedule:Record<string,unknown>;is_active:boolean;created_at:string}
+export type Call={id:string;agent_id:string;contact_id?:string;direction:string;status:string;from_number:string;to_number:string;duration_seconds:number;cost:number;revenue:number;sentiment?:string;outcome?:string;created_at:string}
+export type Contact={id:string;first_name:string;last_name:string;email?:string;phone?:string;job_title?:string;timezone:string;tags:string[];do_not_call:boolean;created_at:string}
+export type Meeting={id:string;title:string;description:string;start_at:string;end_at:string;timezone:string;status:string;location?:string;created_at:string}
+export type DashboardData={total_calls:number;completed_calls:number;success_rate:number;average_duration_seconds:number;revenue:number;cost:number;voice_credits_seconds:number;active_agents:number;recent_calls:Call[];system_health:Record<string,string>}
+export type Paginated<T>={total:number;page:number;page_size:number;items:T[]}
