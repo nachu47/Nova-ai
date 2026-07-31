@@ -1,6 +1,6 @@
 import axios, { AxiosError, type InternalAxiosRequestConfig } from 'axios'
-const API_BASE='/api/v1'
-export const api=axios.create({baseURL:API_BASE,withCredentials:true,headers:{'Content-Type':'application/json'}})
+const API_BASE = import.meta.env.VITE_API_URL || '/api/v1'
+export const api = axios.create({ baseURL: API_BASE, withCredentials: true, headers: { 'Content-Type': 'application/json' } })
 let accessToken=localStorage.getItem('nova_access_token')
 let csrfToken=localStorage.getItem('nova_csrf_token')
 let refreshPromise:Promise<string>|null=null
