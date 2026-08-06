@@ -5,3 +5,4 @@ export type Contact={id:string;first_name:string;last_name:string;email?:string;
 export type Meeting={id:string;title:string;description:string;start_at:string;end_at:string;timezone:string;status:string;location?:string;created_at:string}
 export type DashboardData={total_calls:number;completed_calls:number;success_rate:number;average_duration_seconds:number;revenue:number;cost:number;voice_credits_seconds:number;active_agents:number;recent_calls:Call[];system_health:Record<string,string>}
 export type Paginated<T>={total:number;page:number;page_size:number;items:T[]}
+export type CallSummary={id:string;call_id:string;summary:string;key_points:string[];action_items:string[];disposition:string;sentiment:string;structured_data:Record<string,unknown>}
