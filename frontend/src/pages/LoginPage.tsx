@@ -28,16 +28,19 @@ export function LoginPage() {
   }
 
   return (
-    <div className="relative min-h-screen w-full flex items-center justify-center overflow-hidden bg-[#f0eaff]">
+    <div className="relative min-h-screen w-full bg-[#f0eaff] overflow-hidden">
       {/* Background Shapes */}
       <div className="absolute -top-40 -left-40 w-[600px] h-[600px] rounded-full border border-white/40 shadow-[inset_0_0_100px_rgba(255,255,255,0.5)] bg-gradient-to-br from-white/20 to-transparent backdrop-blur-3xl" />
       <div className="absolute -bottom-40 -right-40 w-[800px] h-[800px] rounded-full border border-white/20 shadow-[inset_0_0_100px_rgba(255,255,255,0.3)] bg-gradient-to-tl from-[#e3d5ff]/40 to-transparent backdrop-blur-2xl" />
       
-      {/* Login Card */}
-      <div className="relative z-10 w-full max-w-[420px] mx-4 sm:mx-auto p-6 sm:p-10 rounded-3xl sm:rounded-[32px] bg-white/30 backdrop-blur-xl border border-white/60 shadow-[0_8px_32px_0_rgba(31,38,135,0.05)]">
+      {/* Scrollable container to prevent flex clipping on small screens */}
+      <div className="relative z-10 min-h-screen w-full flex items-center justify-center p-4 sm:p-8 overflow-y-auto">
         
-        {/* Header */}
-        <div className="mb-6 sm:mb-8">
+        {/* Login Card */}
+        <div className="w-full max-w-[420px] p-6 sm:p-10 rounded-3xl sm:rounded-[32px] bg-white/30 backdrop-blur-xl border border-white/60 shadow-[0_8px_32px_0_rgba(31,38,135,0.05)] my-auto">
+          
+          {/* Header */}
+          <div className="mb-6 sm:mb-8">
           <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-[#7455f6] to-[#9b7aff] text-white shadow-lg shadow-indigo-500/30 mb-6">
             <Activity className="h-7 w-7" />
           </div>
