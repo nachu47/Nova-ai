@@ -34,10 +34,10 @@ export function LoginPage() {
       <div className="absolute -bottom-40 -right-40 w-[800px] h-[800px] rounded-full border border-white/20 shadow-[inset_0_0_100px_rgba(255,255,255,0.3)] bg-gradient-to-tl from-[#e3d5ff]/40 to-transparent backdrop-blur-2xl" />
       
       {/* Login Card */}
-      <div className="relative z-10 w-full max-w-[420px] p-10 rounded-[32px] bg-white/30 backdrop-blur-xl border border-white/60 shadow-[0_8px_32px_0_rgba(31,38,135,0.05)]">
+      <div className="relative z-10 w-full max-w-[420px] mx-4 sm:mx-auto p-6 sm:p-10 rounded-3xl sm:rounded-[32px] bg-white/30 backdrop-blur-xl border border-white/60 shadow-[0_8px_32px_0_rgba(31,38,135,0.05)]">
         
         {/* Header */}
-        <div className="mb-8">
+        <div className="mb-6 sm:mb-8">
           <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-[#7455f6] to-[#9b7aff] text-white shadow-lg shadow-indigo-500/30 mb-6">
             <Activity className="h-7 w-7" />
           </div>
