@@ -15,6 +15,7 @@ export function CallsPage() {
   const { data: agents } = useApi<Agent[]>('/agents');
   
   const [agentId, setAgentId] = useState('');
+  const [countryCode, setCountryCode] = useState('+1');
   const [number, setNumber] = useState('');
   const [message, setMessage] = useState('');
   const [busy, setBusy] = useState(false);
@@ -29,10 +30,21 @@ export function CallsPage() {
     e.preventDefault();
     setBusy(true);
     setMessage('');
+    
+    // Ensure the number is properly formatted with the country code
+    let formattedNumber = number.trim();
+    if (!formattedNumber.startsWith('+')) {
+      // Remove any leading zeros if they typed it
+      if (formattedNumber.startsWith('0')) {
+        formattedNumber = formattedNumber.substring(1);
+      }
+      formattedNumber = `${countryCode}${formattedNumber}`;
+    }
+
     try {
       await api.post('/calls/outbound', { 
         agent_id: agentId || agents?.[0]?.id, 
-        to_number: number, 
+        to_number: formattedNumber, 
         context: { source: 'dashboard' } 
       });
       setNumber('');
@@ -88,7 +100,24 @@ export function CallsPage() {
               <option value="">Select an agent</option>
               {agents?.filter(a => a.is_active).map(a => <option key={a.id} value={a.id}>{a.name}</option>)}
             </select>
-            <Input value={number} onChange={e => setNumber(e.target.value)} placeholder="E.164 number, e.g. +442079460000" required />
+            <div className="flex gap-2">
+              <select 
+                className="h-10 rounded-md border bg-background px-3 text-sm w-[100px]" 
+                value={countryCode} 
+                onChange={e => setCountryCode(e.target.value)}
+              >
+                <option value="+1">🇺🇸 +1</option>
+                <option value="+44">🇬🇧 +44</option>
+                <option value="+91">🇮🇳 +91</option>
+                <option value="+61">🇦🇺 +61</option>
+                <option value="+49">🇩🇪 +49</option>
+                <option value="+33">🇫🇷 +33</option>
+                <option value="+81">🇯🇵 +81</option>
+                <option value="+86">🇨🇳 +86</option>
+                <option value="+55">🇧🇷 +55</option>
+              </select>
+              <Input className="flex-1" value={number} onChange={e => setNumber(e.target.value)} placeholder="Phone number" required />
+            </div>
             <Button disabled={busy || !agents?.length}>
               <PhoneCall className="mr-2 h-4 w-4" />{busy ? 'Queuing…' : 'Start call'}
             </Button>
