@@ -209,7 +209,7 @@ class Call(UUIDPrimaryKeyMixin, TimestampMixin, SoftDeleteMixin, Base):
     status: Mapped[str] = mapped_column(String(24), default="queued", nullable=False, index=True)
     from_number: Mapped[str] = mapped_column(String(32), nullable=False)
     to_number: Mapped[str] = mapped_column(String(32), nullable=False)
-    provider: Mapped[str] = mapped_column(String(24), default="mock", nullable=False)
+    provider: Mapped[str] = mapped_column(String(24), default="twilio", nullable=False)
     provider_call_sid: Mapped[str | None] = mapped_column(String(80), nullable=True, index=True)
     stream_sid: Mapped[str | None] = mapped_column(String(80), index=True)
     started_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), index=True)

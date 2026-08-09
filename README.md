@@ -55,7 +55,7 @@ Whether you're handling inbound support calls or executing outbound sales campai
 
 ## Quick Start Guide
 
-You can launch the entire platform in just two commands! Out of the box, it runs in **Local Mock Mode**, allowing you to test the dashboard, CRM, and analytics without needing any paid credentials.
+You can launch the entire platform in just two commands!
 
 ```bash
 # 1. Copy the environment template
@@ -74,15 +74,17 @@ Once the containers are running, access the platform at these URLs:
 | **Prometheus Metrics** | [http://localhost:9090](http://localhost:9090) |
 | **Grafana Dashboards** | [http://localhost:3001](http://localhost:3001) |
 
-> **Default Admin Login:**
-> - **Email:** `admin@nova.example.com`
-> - **Password:** `NovaAdmin123!`
+> **Development Admin Login:**
+> You can create a superadmin account during your first migration, or by running:
+> ```bash
+> python scripts/promote_superadmin.py <your-email>
+> ```
 
 ---
 
 ## Enabling Real AI Phone Calls
 
-Ready to connect your AI to real phone numbers? Follow these steps to enable Twilio and OpenAI:
+Ready to connect your AI to real phone numbers? Follow these steps to enable Twilio and OpenAI for your tenants:
 
 1. **Set up your environment variables** in `.env`:
    ```dotenv
@@ -92,20 +94,22 @@ Ready to connect your AI to real phone numbers? Follow these steps to enable Twi
    CORS_ORIGINS=https://your-domain.ngrok-free.dev
    
    VOICE_PROVIDER_MODE=twilio
-   TWILIO_ACCOUNT_SID=your_twilio_sid
-   TWILIO_AUTH_TOKEN=your_twilio_auth_token
-   TWILIO_PHONE_NUMBER=+1234567890
    OPENAI_API_KEY=sk-your-openai-key
    ```
 
-2. **Configure your Twilio Webhook**:
-   In your Twilio Phone Number settings, set the **Incoming Call Webhook** to:
+2. **Configure Tenant Twilio Credentials**:
+   Because this is a multi-tenant platform, each tenant uses their own Twilio credentials. 
+   - Log into the dashboard and navigate to **Settings**.
+   - Enter your tenant's `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, and `TWILIO_PHONE_NUMBER`.
+
+3. **Configure your Twilio Webhook**:
+   In your Twilio Console Phone Number settings, set the **Incoming Call Webhook** to:
    ```text
    POST https://your-domain.ngrok-free.dev/api/v1/voice/twilio/inbound/{agent_id}
    ```
-   *(You can find your `agent_id` in the Agents page of the dashboard).*
+   *(You can find your `agent_id` in the Voice Agents page of the dashboard).*
 
-3. **Restart the backend** to apply the changes:
+4. **Restart the backend** to apply the `.env` changes:
    ```bash
    docker compose restart backend
    ```

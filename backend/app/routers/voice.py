@@ -12,24 +12,29 @@ from app.core.security import decode_jwt
 from app.database.session import SessionLocal
 from app.models.entities import Call, Contact, VoiceAgent
 from app.services.realtime_service import bridge_twilio_openai
-from app.services.twilio_service import start_inbound_recording, twiml_for_call
+from app.services.twilio_service import start_inbound_recording, twiml_for_call, get_twilio_credentials
 
 router = APIRouter(prefix="/voice", tags=["voice provider webhooks"])
 
 
-async def _validate_twilio(request: Request, form: dict) -> None:
+async def _validate_twilio(request: Request, form: dict, auth_token: str | None) -> None:
     if settings.voice_provider_mode != "twilio" or not settings.twilio_validate_signatures: return
+    if not auth_token: return
     signature = request.headers.get("X-Twilio-Signature", "")
     url = f"{settings.public_base_url.rstrip('/')}{request.url.path}"
     if request.url.query: url += f"?{request.url.query}"
-    if not RequestValidator(settings.twilio_auth_token).validate(url, form, signature): raise HTTPException(status_code=403, detail="Invalid Twilio signature")
+    if not RequestValidator(auth_token).validate(url, form, signature): raise HTTPException(status_code=403, detail="Invalid Twilio signature")
 
 
 @router.post("/twilio/inbound/{agent_id}")
 async def inbound(agent_id: str, request: Request, db: Session = Depends(get_db)):
-    form = dict(await request.form()); await _validate_twilio(request, form)
+    form = dict(await request.form())
     agent = db.get(VoiceAgent, agent_id)
     if not agent or not agent.is_active or agent.deleted_at is not None: raise HTTPException(status_code=404, detail="Voice agent not found")
+    
+    _, auth_token, _ = get_twilio_credentials(db, agent.organization_id)
+    await _validate_twilio(request, form, auth_token)
+
     from_number, to_number, sid = str(form.get("From", "unknown")), str(form.get("To", "unknown")), str(form.get("CallSid", "")) or None
     contact = db.scalar(select(Contact).where(Contact.organization_id == agent.organization_id, Contact.phone == from_number, Contact.deleted_at.is_(None)))
     call = db.scalar(select(Call).where(Call.provider == "twilio", Call.provider_call_sid == sid)) if sid else None
@@ -38,7 +43,7 @@ async def inbound(agent_id: str, request: Request, db: Session = Depends(get_db)
         db.add(call); db.commit(); db.refresh(call)
         if sid and settings.voice_provider_mode == "twilio":
             try:
-                call.recording_sid = start_inbound_recording(sid, call.id)
+                call.recording_sid = start_inbound_recording(db, call)
                 db.commit()
             except Exception as exc:
                 call.failure_reason = f"Recording startup failed: {exc}"[:4000]
@@ -48,17 +53,25 @@ async def inbound(agent_id: str, request: Request, db: Session = Depends(get_db)
 
 @router.post("/twilio/outbound/{call_id}")
 async def outbound_twiml(call_id: str, request: Request, db: Session = Depends(get_db)):
-    form = dict(await request.form()); await _validate_twilio(request, form)
+    form = dict(await request.form())
     call = db.get(Call, call_id); agent = db.get(VoiceAgent, call.agent_id) if call else None
     if not call or not agent: raise HTTPException(status_code=404, detail="Call not found")
+    
+    _, auth_token, _ = get_twilio_credentials(db, call.organization_id)
+    await _validate_twilio(request, form, auth_token)
+
     return Response(twiml_for_call(call, agent), media_type="application/xml")
 
 
 @router.post("/twilio/status/{call_id}")
 async def status_callback(call_id: str, request: Request, db: Session = Depends(get_db)):
-    form = dict(await request.form()); await _validate_twilio(request, form)
+    form = dict(await request.form())
     call = db.get(Call, call_id)
     if not call: raise HTTPException(status_code=404, detail="Call not found")
+
+    _, auth_token, _ = get_twilio_credentials(db, call.organization_id)
+    await _validate_twilio(request, form, auth_token)
+
     mapping = {"initiated":"queued", "queued":"queued", "ringing":"ringing", "in-progress":"in_progress", "completed":"completed", "busy":"busy", "failed":"failed", "no-answer":"no_answer", "canceled":"cancelled"}
     terminal = {"completed", "failed", "busy", "no_answer", "cancelled"}
     was_terminal = call.status in terminal
@@ -83,9 +96,13 @@ async def status_callback(call_id: str, request: Request, db: Session = Depends(
 
 @router.post("/twilio/recording/{call_id}")
 async def recording_callback(call_id: str, request: Request, db: Session = Depends(get_db)):
-    form = dict(await request.form()); await _validate_twilio(request, form)
+    form = dict(await request.form())
     call = db.get(Call, call_id)
     if not call: raise HTTPException(status_code=404, detail="Call not found")
+    
+    _, auth_token, _ = get_twilio_credentials(db, call.organization_id)
+    await _validate_twilio(request, form, auth_token)
+
     call.recording_sid = str(form.get("RecordingSid") or ""); call.recording_url = str(form.get("RecordingUrl") or ""); db.commit(); return {"status":"accepted"}
 
 

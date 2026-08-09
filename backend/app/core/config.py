@@ -36,7 +36,7 @@ class Settings(BaseSettings):
     smtp_password: str = ""
     smtp_from_email: str = "noreply@nova.example.com"
 
-    voice_provider_mode: Literal["mock", "twilio"] = "mock"
+    voice_provider_mode: Literal["mock", "twilio"] = "twilio"
     twilio_account_sid: str = ""
     twilio_auth_token: str = ""
     twilio_phone_number: str = ""

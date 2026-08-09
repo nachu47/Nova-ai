@@ -47,7 +47,7 @@ def outbound_call(payload: OutboundCallCreate, request: Request, user: User = De
     )
     db.add(call); db.flush()
     try:
-        call.provider_call_sid = create_outbound_call(call)
+        call.provider_call_sid = create_outbound_call(db, call)
         if settings.voice_provider_mode == "mock": call.status = "ringing"
     except Exception as exc:
         call.status = "failed"; call.failure_reason = str(exc); db.commit(); raise HTTPException(status_code=502, detail=f"Voice provider rejected the call: {exc}") from exc

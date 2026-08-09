@@ -1,5 +1,5 @@
-import { useState, type FormEvent } from 'react';
-import { PhoneCall, Play, FileText, X } from 'lucide-react';
+import { useState, useEffect, type FormEvent } from 'react';
+import { PhoneCall, FileText, X } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -14,11 +14,27 @@ export function CallsPage() {
   const { data, reload, loading } = useApi<Paginated<Call>>('/calls?page_size=100');
   const { data: agents } = useApi<Agent[]>('/agents');
   
+  const searchParams = new URLSearchParams(window.location.search);
+  const initialNumber = searchParams.get('to') || '';
+
   const [agentId, setAgentId] = useState('');
   const [countryCode, setCountryCode] = useState('+1');
-  const [number, setNumber] = useState('');
+  const [number, setNumber] = useState(initialNumber);
   const [message, setMessage] = useState('');
   const [busy, setBusy] = useState(false);
+
+  // Poll for status updates if any call is active
+  useEffect(() => {
+    const hasActiveCalls = data?.items.some(
+      (c) => c.status === 'queued' || c.status === 'ringing' || c.status === 'in-progress'
+    );
+    if (!hasActiveCalls) return;
+
+    const interval = setInterval(() => {
+      reload();
+    }, 2000);
+    return () => clearInterval(interval);
+  }, [data, reload]);
 
   // Summary Modal State
   const [selectedCallId, setSelectedCallId] = useState<string | null>(null);
@@ -57,15 +73,7 @@ export function CallsPage() {
     }
   }
 
-  async function simulate(id: string) {
-    try {
-      await api.post(`/calls/${id}/simulate`);
-      setMessage('Mock call completed and summary queued.');
-      await reload();
-    } catch (err) {
-      setMessage(errorMessage(err));
-    }
-  }
+
 
   async function fetchSummary(id: string) {
     setSelectedCallId(id);
@@ -92,7 +100,7 @@ export function CallsPage() {
       <Card>
         <CardHeader>
           <CardTitle>New outbound call</CardTitle>
-          <CardDescription>Mock mode runs locally. Twilio mode places a real call using the same endpoint.</CardDescription>
+          <CardDescription>Initiate an outbound call to a contact.</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={create} className="grid gap-3 md:grid-cols-[1fr_1fr_auto]">
@@ -131,7 +139,7 @@ export function CallsPage() {
           <CardTitle>Call history</CardTitle>
         </CardHeader>
         <CardContent>
-          {loading ? <p>Loading calls…</p> : (
+          {loading && !data ? <p>Loading calls…</p> : (
             <Table>
               <TableHeader>
                 <TableRow>
@@ -141,7 +149,7 @@ export function CallsPage() {
                   <TableHead>Duration</TableHead>
                   <TableHead>Revenue</TableHead>
                   <TableHead>Created</TableHead>
-                  <TableHead />
+                  <TableHead>Summary</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -154,12 +162,7 @@ export function CallsPage() {
                     <TableCell>{money(Number(call.revenue))}</TableCell>
                     <TableCell>{new Date(call.created_at).toLocaleString()}</TableCell>
                     <TableCell>
-                      {call.status !== 'completed' && (
-                        <Button size="sm" variant="outline" onClick={() => void simulate(call.id)}>
-                          <Play className="mr-1.5 h-3.5 w-3.5" />Simulate
-                        </Button>
-                      )}
-                      {call.status === 'completed' && (
+                      {['completed', 'failed', 'busy', 'no_answer', 'cancelled'].includes(call.status) && (
                         <Button size="sm" variant="secondary" onClick={() => void fetchSummary(call.id)}>
                           <FileText className="mr-1.5 h-3.5 w-3.5" />Summary
                         </Button>

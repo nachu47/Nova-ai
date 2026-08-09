@@ -8,3 +8,13 @@ export function setTokens(access:string|null,csrf:string|null){accessToken=acces
 api.interceptors.request.use((config:InternalAxiosRequestConfig)=>{if(accessToken)config.headers.Authorization=`Bearer ${accessToken}`;return config})
 api.interceptors.response.use(r=>r,async(error:AxiosError)=>{const original=error.config as (InternalAxiosRequestConfig&{_retry?:boolean})|undefined;if(error.response?.status===401&&original&&!original._retry&&!original.url?.includes('/auth/')){original._retry=true;refreshPromise??=api.post('/auth/refresh',{}, {headers:{'X-CSRF-Token':csrfToken??''}}).then(({data})=>{setTokens(data.access_token,data.csrf_token);return data.access_token}).finally(()=>{refreshPromise=null});try{const token=await refreshPromise;original.headers.Authorization=`Bearer ${token}`;return api(original)}catch{setTokens(null,null);window.location.assign('/login')}}return Promise.reject(error)})
 export function errorMessage(error:unknown){if(axios.isAxiosError(error)){const body=error.response?.data as {detail?:unknown}|undefined;const detail=body?.detail;return typeof detail==='string'?detail:'The request could not be completed.'}return error instanceof Error?error.message:'Unexpected error'}
+
+export async function getSettings() {
+  const { data } = await api.get('/settings');
+  return data;
+}
+
+export async function updateSetting(key: string, value: any, isSecret: boolean = false) {
+  const { data } = await api.put(`/settings/${key}?is_secret=${isSecret}`, value);
+  return data;
+}

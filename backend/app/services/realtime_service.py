@@ -61,15 +61,20 @@ async def mock_voice_stream(websocket: WebSocket, call_id: str) -> None:
 
 async def bridge_twilio_openai(websocket: WebSocket, call_id: str) -> None:
     """Bridge Twilio bidirectional PCMU media to the OpenAI Realtime API."""
-    if not settings.openai_api_key:
-        await mock_voice_stream(websocket, call_id)
-        return
-
     with SessionLocal() as db:
         call = db.get(Call, call_id)
         agent = db.get(VoiceAgent, call.agent_id) if call else None
         if not call or not agent:
             raise ValueError("Call or agent not found")
+            
+        from app.services.settings_service import get_setting
+        api_key_val = get_setting(db, call.organization_id, "openai_api_key")
+        openai_api_key = (api_key_val.get("secret") if isinstance(api_key_val, dict) else api_key_val) or settings.openai_api_key
+
+        if not openai_api_key:
+            await mock_voice_stream(websocket, call_id)
+            return
+
         memory = build_conversation_memory(db, call)
         instructions = agent.system_prompt + (f"\n\nConversation memory:\n{memory}" if memory else "")
         agent_data = {
@@ -80,7 +85,7 @@ async def bridge_twilio_openai(websocket: WebSocket, call_id: str) -> None:
         }
 
     url = f"wss://api.openai.com/v1/realtime?model={settings.openai_realtime_model}"
-    headers = {"Authorization": f"Bearer {settings.openai_api_key}"}
+    headers = {"Authorization": f"Bearer {openai_api_key}"}
 
     async with connect(url, additional_headers=headers, max_size=8_000_000) as openai_ws:
         enabled_tools = [tool for tool in TOOL_DEFINITIONS if tool["name"] in agent_data["tools"]]

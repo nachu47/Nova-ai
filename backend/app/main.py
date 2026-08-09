@@ -12,7 +12,7 @@ from app.core.logging import configure_logging,logger
 from app.middleware.rate_limit import RateLimitMiddleware
 from app.middleware.request_context import RequestContextMiddleware
 from app.middleware.security_headers import SecurityHeadersMiddleware
-from app.routers import admin,agents,ai,analytics,auth,calls,crm,health,integrations,notifications,scheduling,users,voice,webhooks
+from app.routers import admin,agents,ai,analytics,auth,calls,crm,health,integrations,notifications,scheduling,settings as api_settings,users,voice,webhooks
 
 
 @asynccontextmanager
@@ -35,7 +35,7 @@ app.add_middleware(CORSMiddleware,allow_origins=settings.cors_origins,allow_cred
 # app.add_middleware(RateLimitMiddleware)
 # app.add_middleware(RequestContextMiddleware)
 
-for router in [health.router,auth.router,users.router,agents.router,calls.router,voice.router,crm.router,scheduling.router,ai.router,integrations.router,webhooks.router,notifications.router,analytics.router,admin.router]:app.include_router(router,prefix=settings.api_prefix)
+for router in [health.router,auth.router,users.router,agents.router,calls.router,voice.router,crm.router,scheduling.router,ai.router,integrations.router,webhooks.router,notifications.router,analytics.router,admin.router,api_settings.router]:app.include_router(router,prefix=settings.api_prefix)
 
 
 @app.get("/",include_in_schema=False)
