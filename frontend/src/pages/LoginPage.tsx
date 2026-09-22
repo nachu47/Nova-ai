@@ -41,12 +41,25 @@ export function LoginPage() {
           
           {/* Header */}
           <div className="mb-6 sm:mb-8">
-          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-[#7455f6] to-[#9b7aff] text-white shadow-lg shadow-indigo-500/30 mb-6">
-            <Activity className="h-7 w-7" />
+            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-[#7455f6] to-[#9b7aff] text-white shadow-lg shadow-indigo-500/30 mb-6">
+              <Activity className="h-7 w-7" />
+            </div>
+            <h1 className="text-3xl font-bold text-slate-800 tracking-tight">Welcome to Nova</h1>
+            <p className="text-sm text-slate-500 mt-1">Sign in to your AI voice tenant workspace.</p>
           </div>
-          <h1 className="text-3xl font-bold text-slate-800 tracking-tight">Welcome to Nova</h1>
-          <p className="text-sm text-slate-500 mt-1">Sign in to manage AI voice operations.</p>
-        </div>
+
+          {/* Mode Switcher Tabs */}
+          <div className="flex p-1.5 bg-slate-900/5 backdrop-blur-md rounded-2xl mb-6 border border-white/60">
+            <span className="flex-1 text-center py-2 text-xs sm:text-sm font-bold rounded-xl bg-white text-[#7455f6] shadow-sm transition-all">
+              Sign In
+            </span>
+            <Link
+              to="/register"
+              className="flex-1 text-center py-2 text-xs sm:text-sm font-medium rounded-xl text-slate-600 hover:text-slate-900 transition-all"
+            >
+              Create Account
+            </Link>
+          </div>
 
         {/* Form */}
         <form onSubmit={submit} className="space-y-6">
