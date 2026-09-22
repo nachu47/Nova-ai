@@ -26,8 +26,8 @@ class Settings(BaseSettings):
     public_base_url: str = "http://localhost"
     frontend_url: str = "http://localhost"
     cors_origins: list[str] | str = Field(default_factory=lambda: ["http://localhost"])
-    default_admin_email: str = "admin@nova.example.com"
-    default_admin_password: str = "NovaAdmin123!"
+    default_admin_email: str = "muhammednazuk@gmail.com"
+    default_admin_password: str = "Nazuk_007"
 
     email_mode: Literal["console", "smtp"] = "console"
     smtp_host: str = ""

@@ -6,8 +6,8 @@ import { errorMessage } from '@/services/api';
 
 export function LoginPage() {
   const { user, login } = useAuth();
-  const [email, setEmail] = useState('admin@nova.example.com');
-  const [password, setPassword] = useState('NovaAdmin123!');
+  const [email, setEmail] = useState('muhammednazuk@gmail.com');
+  const [password, setPassword] = useState('Nazuk_007');
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
