@@ -1,6 +1,6 @@
 import { useState, type FormEvent } from 'react';
 import { Link, Navigate } from 'react-router-dom';
-import { Activity, Building2, User as UserIcon, Mail, Lock, Globe, ArrowRight } from 'lucide-react';
+import { Headset, Building2, User as UserIcon, Mail, Lock, Globe, ArrowRight } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { errorMessage } from '@/services/api';
 
@@ -43,7 +43,7 @@ export function RegisterPage() {
           {/* Header */}
           <div className="mb-6">
             <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-[#7455f6] to-[#9b7aff] text-white shadow-lg shadow-indigo-500/30 mb-6">
-              <Activity className="h-7 w-7" />
+              <Headset className="h-7 w-7" />
             </div>
             <h1 className="text-3xl font-bold text-slate-800 tracking-tight">Create Workspace</h1>
             <p className="text-sm text-slate-500 mt-1">Start your isolated AI voice tenant account.</p>

@@ -14,7 +14,7 @@ export async function getSettings() {
   return data;
 }
 
-export async function updateSetting(key: string, value: any, isSecret: boolean = false) {
+export async function updateSetting(key: string, value: unknown, isSecret: boolean = false) {
   const { data } = await api.put(`/settings/${key}?is_secret=${isSecret}`, value);
   return data;
 }

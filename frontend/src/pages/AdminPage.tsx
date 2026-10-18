@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ShieldCheck, Building2, Users, Phone, FileText, ToggleLeft, AlertCircle, Plus, Power, Activity } from 'lucide-react';
+import { ShieldCheck, Building2, Users, Phone, FileText, Plus, Power, Activity } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -68,7 +68,7 @@ export function AdminPage() {
   
   // Superadmin-level hooks
   const { data: orgs, reload: reloadOrgs } = useApi<GlobalOrg[]>(isSuperadmin ? '/admin/organizations' : null);
-  const { data: globalUsers, reload: reloadGlobalUsers } = useApi<GlobalUser[]>(isSuperadmin ? '/admin/global-users' : null);
+  const { data: globalUsers } = useApi<GlobalUser[]>(isSuperadmin ? '/admin/global-users' : null);
   const { data: globalCalls } = useApi<{ total: number; items: GlobalCall[] }>(isSuperadmin ? '/admin/global-calls' : null);
   const { data: auditLogs } = useApi<AuditLog[]>(isSuperadmin ? '/admin/global-audit-logs' : null);
 
@@ -158,7 +158,7 @@ export function AdminPage() {
       </div>
 
       {message && (
-        <div className="p-4 rounded-xl bg-indigo-50 border border-indigo-200 text-indigo-900 text-sm font-medium flex items-center justify-between shadow-sm">
+        <div className="p-4 rounded-xl bg-indigo-50 dark:bg-indigo-500/10 border border-indigo-200 dark:border-indigo-500/30 text-indigo-900 dark:text-indigo-200 text-sm font-medium flex items-center justify-between shadow-sm">
           <span>{message}</span>
           <button onClick={() => setMessage('')} className="text-indigo-500 hover:text-indigo-800 text-xs">Dismiss</button>
         </div>
@@ -179,7 +179,7 @@ export function AdminPage() {
             return (
               <button
                 key={tab.id}
-                onClick={() => setActiveTab(tab.id as any)}
+                onClick={() => setActiveTab(tab.id as typeof activeTab)}
                 className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all ${
                   active
                     ? 'bg-white dark:bg-slate-900 text-[#7455f6] shadow-sm'
@@ -197,34 +197,34 @@ export function AdminPage() {
       {/* Platform Overview Metrics Cards */}
       {(!isSuperadmin || activeTab === 'overview') && (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <Card className="border-indigo-100 shadow-sm">
+          <Card className="border-border shadow-sm">
             <CardContent className="p-5">
               <Building2 className="h-6 w-6 text-indigo-600" />
-              <p className="mt-3 text-3xl font-extrabold text-slate-900">{platform?.organizations || 1}</p>
-              <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mt-1">Tenant Organizations</p>
+              <p className="mt-3 text-3xl font-extrabold text-foreground">{platform?.organizations || 1}</p>
+              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mt-1">Tenant Organizations</p>
             </CardContent>
           </Card>
-          <Card className="border-indigo-100 shadow-sm">
+          <Card className="border-border shadow-sm">
             <CardContent className="p-5">
               <Users className="h-6 w-6 text-indigo-600" />
-              <p className="mt-3 text-3xl font-extrabold text-slate-900">{platform?.users || 0}</p>
-              <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mt-1">Platform Users</p>
+              <p className="mt-3 text-3xl font-extrabold text-foreground">{platform?.users || 0}</p>
+              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mt-1">Platform Users</p>
             </CardContent>
           </Card>
-          <Card className="border-indigo-100 shadow-sm">
+          <Card className="border-border shadow-sm">
             <CardContent className="p-5">
               <Phone className="h-6 w-6 text-indigo-600" />
-              <p className="mt-3 text-3xl font-extrabold text-slate-900">{platform?.calls || 0}</p>
-              <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mt-1">Total AI Calls</p>
+              <p className="mt-3 text-3xl font-extrabold text-foreground">{platform?.calls || 0}</p>
+              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mt-1">Total AI Calls</p>
             </CardContent>
           </Card>
-          <Card className="border-indigo-100 shadow-sm">
+          <Card className="border-border shadow-sm">
             <CardContent className="p-5">
               <ShieldCheck className="h-6 w-6 text-emerald-600" />
-              <p className="mt-3 text-3xl font-extrabold text-slate-900">
+              <p className="mt-3 text-3xl font-extrabold text-foreground">
                 £{(platform?.usage_revenue || 0).toFixed(2)}
               </p>
-              <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mt-1">Platform Revenue</p>
+              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mt-1">Platform Revenue</p>
             </CardContent>
           </Card>
         </div>
@@ -234,7 +234,7 @@ export function AdminPage() {
       {isSuperadmin && activeTab === 'orgs' && (
         <div className="space-y-6">
           {/* Create New Tenant Form */}
-          <Card className="border-indigo-100 shadow-sm">
+          <Card className="border-border shadow-sm">
             <CardHeader>
               <CardTitle className="text-lg flex items-center gap-2">
                 <Plus className="h-5 w-5 text-[#7455f6]" />
@@ -250,7 +250,7 @@ export function AdminPage() {
                   value={newOrgName}
                   onChange={(e) => setNewOrgName(e.target.value)}
                   required
-                  className="h-10 flex-1 rounded-xl border border-slate-300 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#7455f6]"
+                  className="h-10 flex-1 rounded-xl border border-border px-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#7455f6]"
                 />
                 <Button disabled={creatingOrg} className="bg-[#7455f6] hover:bg-[#6242e2] text-white font-bold">
                   {creatingOrg ? 'Creating…' : 'Create Tenant'}
@@ -282,13 +282,13 @@ export function AdminPage() {
                 <TableBody>
                   {orgs?.map((org) => (
                     <TableRow key={org.id}>
-                      <TableCell className="font-bold text-slate-800">{org.name}</TableCell>
+                      <TableCell className="font-bold text-foreground">{org.name}</TableCell>
                       <TableCell>
-                        <div className="font-medium text-xs text-slate-700">{org.owner_name}</div>
-                        <div className="text-[11px] text-slate-400">{org.owner_email}</div>
+                        <div className="font-medium text-xs text-foreground/80">{org.owner_name}</div>
+                        <div className="text-[11px] text-muted-foreground/70">{org.owner_email}</div>
                       </TableCell>
                       <TableCell>
-                        <Badge className={org.plan === 'suspended' ? 'bg-red-100 text-red-700' : 'bg-emerald-100 text-emerald-800'}>
+                        <Badge className={org.plan === 'suspended' ? 'bg-red-100 dark:bg-red-500/15 text-red-700 dark:text-red-300' : 'bg-emerald-100 dark:bg-emerald-500/15 text-emerald-800 dark:text-emerald-300'}>
                           {org.plan.toUpperCase()}
                         </Badge>
                       </TableCell>
@@ -301,7 +301,7 @@ export function AdminPage() {
                           size="sm"
                           variant={org.plan === 'suspended' ? 'default' : 'outline'}
                           onClick={() => toggleOrgStatus(org)}
-                          className={org.plan === 'suspended' ? 'bg-emerald-600 hover:bg-emerald-700 text-white' : 'text-red-600 border-red-200 hover:bg-red-50'}
+                          className={org.plan === 'suspended' ? 'bg-emerald-600 hover:bg-emerald-700 text-white' : 'text-red-600 border-red-200 dark:border-red-500/30 hover:bg-red-50 dark:hover:bg-red-500/10'}
                         >
                           <Power className="h-3.5 w-3.5 mr-1" />
                           {org.plan === 'suspended' ? 'Activate' : 'Suspend'}
@@ -337,17 +337,17 @@ export function AdminPage() {
                 {globalUsers?.map((u) => (
                   <TableRow key={u.id}>
                     <TableCell>
-                      <div className="font-bold text-slate-800">{u.full_name}</div>
-                      <div className="text-xs text-slate-500">{u.email}</div>
+                      <div className="font-bold text-foreground">{u.full_name}</div>
+                      <div className="text-xs text-muted-foreground">{u.email}</div>
                     </TableCell>
-                    <TableCell className="font-semibold text-indigo-700">{u.organization_name || 'N/A'}</TableCell>
+                    <TableCell className="font-semibold text-indigo-700 dark:text-indigo-300">{u.organization_name || 'N/A'}</TableCell>
                     <TableCell>
-                      <Badge className={u.role === 'superadmin' ? 'bg-amber-100 text-amber-900 font-bold' : 'bg-slate-100 text-slate-700'}>
+                      <Badge className={u.role === 'superadmin' ? 'bg-amber-100 dark:bg-amber-500/15 text-amber-900 dark:text-amber-300 font-bold' : 'bg-muted text-foreground/80'}>
                         {u.role}
                       </Badge>
                     </TableCell>
                     <TableCell>
-                      <Badge className={u.is_active ? 'bg-emerald-100 text-emerald-800' : 'bg-red-100 text-red-800'}>
+                      <Badge className={u.is_active ? 'bg-emerald-100 dark:bg-emerald-500/15 text-emerald-800 dark:text-emerald-300' : 'bg-red-100 dark:bg-red-500/15 text-red-800 dark:text-red-300'}>
                         {u.is_active ? 'Active' : 'Inactive'}
                       </Badge>
                     </TableCell>
@@ -381,16 +381,16 @@ export function AdminPage() {
               <TableBody>
                 {globalCalls?.items.map((call) => (
                   <TableRow key={call.id}>
-                    <TableCell className="font-bold text-indigo-700">{call.organization_name}</TableCell>
+                    <TableCell className="font-bold text-indigo-700 dark:text-indigo-300">{call.organization_name}</TableCell>
                     <TableCell className="font-mono text-xs">{call.caller_number || 'Inbound Stream'}</TableCell>
                     <TableCell className="font-mono text-xs">{call.callee_number || 'AI Agent'}</TableCell>
                     <TableCell>
-                      <Badge className={call.status === 'completed' ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-100 text-slate-700'}>
+                      <Badge className={call.status === 'completed' ? 'bg-emerald-100 dark:bg-emerald-500/15 text-emerald-800 dark:text-emerald-300' : 'bg-muted text-foreground/80'}>
                         {call.status}
                       </Badge>
                     </TableCell>
                     <TableCell className="font-semibold">{call.duration_seconds}s</TableCell>
-                    <TableCell className="text-xs text-slate-500">
+                    <TableCell className="text-xs text-muted-foreground">
                       {new Date(call.created_at).toLocaleString()}
                     </TableCell>
                   </TableRow>
@@ -422,11 +422,11 @@ export function AdminPage() {
               <TableBody>
                 {auditLogs?.map((log) => (
                   <TableRow key={log.id}>
-                    <TableCell className="font-mono text-xs font-bold text-indigo-700">{log.action}</TableCell>
-                    <TableCell className="text-xs font-medium text-slate-800">{log.actor_email}</TableCell>
-                    <TableCell className="text-xs text-slate-600">{log.organization_name}</TableCell>
-                    <TableCell className="text-xs text-slate-500">{log.entity_type}</TableCell>
-                    <TableCell className="text-xs text-slate-500">
+                    <TableCell className="font-mono text-xs font-bold text-indigo-700 dark:text-indigo-300">{log.action}</TableCell>
+                    <TableCell className="text-xs font-medium text-foreground">{log.actor_email}</TableCell>
+                    <TableCell className="text-xs text-muted-foreground">{log.organization_name}</TableCell>
+                    <TableCell className="text-xs text-muted-foreground">{log.entity_type}</TableCell>
+                    <TableCell className="text-xs text-muted-foreground">
                       {new Date(log.created_at).toLocaleString()}
                     </TableCell>
                   </TableRow>
@@ -461,13 +461,13 @@ export function AdminPage() {
                   {workspaceUsers?.map((target) => (
                     <TableRow key={target.id}>
                       <TableCell>
-                        <div className="font-medium text-slate-800">{target.full_name}</div>
-                        <div className="text-xs text-slate-500">{target.email}</div>
+                        <div className="font-medium text-foreground">{target.full_name}</div>
+                        <div className="text-xs text-muted-foreground">{target.email}</div>
                       </TableCell>
                       <TableCell className="capitalize font-semibold">{target.role}</TableCell>
                       <TableCell>{target.is_verified ? 'Yes' : 'No'}</TableCell>
                       <TableCell>
-                        <Badge className={target.is_active ? 'bg-emerald-100 text-emerald-800' : 'bg-red-100 text-red-800'}>
+                        <Badge className={target.is_active ? 'bg-emerald-100 dark:bg-emerald-500/15 text-emerald-800 dark:text-emerald-300' : 'bg-red-100 dark:bg-red-500/15 text-red-800 dark:text-red-300'}>
                           {target.is_active ? 'Active' : 'Inactive'}
                         </Badge>
                       </TableCell>

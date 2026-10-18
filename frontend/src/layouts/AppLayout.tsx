@@ -1,7 +1,7 @@
 import { useState, type ComponentType } from 'react';
 import { NavLink, Outlet, Navigate, useLocation } from 'react-router-dom';
 import { 
-    Activity, BarChart3, Bot, Brain, CalendarDays, ChevronLeft, Contact, 
+    BarChart3, Bot, Brain, CalendarDays, ChevronLeft, Contact, Headset, 
     LayoutDashboard, Menu, PhoneCall, Plug, Settings, ShieldCheck, SunMoon, 
     Building2, Users, Server, ShieldAlert, Sliders, DollarSign, Lock, Zap, FileText
 } from 'lucide-react';
@@ -62,7 +62,7 @@ export function AppLayout() {
                 <div className="flex h-16 items-center justify-between border-b px-5 sticky top-0 bg-card z-10">
                     <div className="flex items-center gap-2">
                         <div className="grid h-9 w-9 place-items-center rounded-xl bg-primary text-primary-foreground">
-                            <Activity className="h-5 w-5" />
+                            <Headset className="h-5 w-5" />
                         </div>
                         <div>
                             <p className="font-semibold">{user?.role === 'superadmin' ? 'Global Platform' : 'Nova AI'}</p>

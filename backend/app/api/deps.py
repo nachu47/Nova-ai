@@ -9,7 +9,7 @@ from sqlalchemy.orm import Session
 
 from app.core.security import decode_jwt, hash_token
 from app.database.session import SessionLocal
-from app.models.entities import APIKey, User
+from app.models.entities import APIKey, Organization, User
 
 bearer = HTTPBearer(auto_error=False)
 
@@ -39,6 +39,13 @@ def _api_key_user(db: Session, raw_key: str) -> tuple[User, set[str]] | None:
     return (user, set(record.scopes or [])) if user else None
 
 
+def is_organization_suspended(db: Session, user: User) -> bool:
+    if user.role == "superadmin":
+        return False
+    org = db.get(Organization, user.organization_id)
+    return org is None or org.deleted_at is not None or org.plan == "suspended"
+
+
 def get_current_user(
     request: Request,
     credentials: HTTPAuthorizationCredentials | None = Depends(bearer),
@@ -62,6 +69,8 @@ def get_current_user(
             user = None
     if not user or not user.is_active or user.deleted_at is not None:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid authentication")
+    if is_organization_suspended(db, user):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Organization is suspended")
     request.state.user_id = user.id
     request.state.organization_id = user.organization_id
     return user

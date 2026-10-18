@@ -8,7 +8,7 @@ from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
-from app.api.deps import get_current_user, get_db
+from app.api.deps import get_current_user, get_db, is_organization_suspended
 from app.core.config import settings
 from app.core.security import create_jwt, decode_jwt, hash_password, hash_token, new_random_token, verify_password
 from app.models.entities import OneTimeToken, Organization, RefreshToken, User
@@ -79,6 +79,8 @@ def login(payload: LoginRequest, request: Request, response: Response, db: Sessi
     user = db.scalar(select(User).where(User.email == payload.email.lower(), User.deleted_at.is_(None)))
     if not user or not verify_password(payload.password, user.password_hash) or not user.is_active:
         raise HTTPException(status_code=401, detail="Invalid email or password")
+    if is_organization_suspended(db, user):
+        raise HTTPException(status_code=403, detail="Organization is suspended")
     user.last_login_at = datetime.now(UTC); token = _issue_tokens(db, user, request, response)
     write_audit(db, action="auth.login", entity_type="user", entity_id=user.id, organization_id=user.organization_id, actor_id=user.id, request=request); db.commit(); return token
 
@@ -111,6 +113,8 @@ def refresh(request: Request, response: Response, x_csrf_token: str | None = Hea
     user = db.get(User, payload["sub"])
     if not user or not user.is_active:
         raise HTTPException(status_code=401, detail="User is inactive")
+    if is_organization_suspended(db, user):
+        raise HTTPException(status_code=403, detail="Organization is suspended")
     record.revoked_at = datetime.now(UTC)
     token = _issue_tokens(
         db, user, request, response, family_id=record.family_id, previous_record=record

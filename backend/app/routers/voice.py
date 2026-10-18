@@ -10,7 +10,7 @@ from app.api.deps import get_db
 from app.core.config import settings
 from app.core.security import decode_jwt
 from app.database.session import SessionLocal
-from app.models.entities import Call, Contact, VoiceAgent
+from app.models.entities import Call, Contact, Organization, VoiceAgent
 from app.services.realtime_service import bridge_twilio_openai
 from app.services.twilio_service import start_inbound_recording, twiml_for_call, get_twilio_credentials
 
@@ -31,7 +31,9 @@ async def inbound(agent_id: str, request: Request, db: Session = Depends(get_db)
     form = dict(await request.form())
     agent = db.get(VoiceAgent, agent_id)
     if not agent or not agent.is_active or agent.deleted_at is not None: raise HTTPException(status_code=404, detail="Voice agent not found")
-    
+    org = db.get(Organization, agent.organization_id)
+    if not org or org.deleted_at is not None or org.plan == "suspended": raise HTTPException(status_code=403, detail="Organization is suspended")
+
     _, auth_token, _ = get_twilio_credentials(db, agent.organization_id)
     await _validate_twilio(request, form, auth_token)
 

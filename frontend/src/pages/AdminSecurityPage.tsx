@@ -22,7 +22,7 @@ export function AdminSecurityPage() {
     const securityAlerts = [
         { id: '1', level: 'LOW', title: 'Server-Enforced Multi-Tenancy Active', desc: 'All tenant queries isolated by organization_id.' },
         { id: '2', level: 'LOW', title: 'JWT Token Rotation Enabled', desc: 'Active sessions protected with secret key encryption.' },
-        { id: '3', level: 'LOW', title: 'Rate Limiting Policy Enabled', desc: 'API rate limits enforced at 120 requests/min.' }
+        { id: '3', level: 'LOW', title: 'Rate Limiting Policy Enabled', desc: 'Per-client API rate limits are enforced by the backend and NGINX.' }
     ];
 
     return (

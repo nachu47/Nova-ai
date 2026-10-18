@@ -1,13 +1,26 @@
 from datetime import UTC,datetime,timedelta
 
 from fastapi import APIRouter,Depends,Query
-from sqlalchemy import case,func,select
+from sqlalchemy import case,func,select,text
 from sqlalchemy.orm import Session
 
+from redis import Redis
+
 from app.api.deps import get_current_user,get_db
+from app.core.config import settings
 from app.models.entities import Call,Company,Contact,Organization,UsageRecord,User,VoiceAgent
 
 router=APIRouter(prefix="/analytics",tags=["analytics"])
+
+
+def _system_health(db:Session)->dict[str,str]:
+    health={"api":"healthy","database":"unhealthy","redis":"unhealthy"}
+    try:db.execute(text("SELECT 1"));health["database"]="healthy"
+    except Exception:pass
+    try:
+        if Redis.from_url(settings.redis_url,socket_connect_timeout=1,socket_timeout=1).ping():health["redis"]="healthy"
+    except Exception:pass
+    return health
 
 
 @router.get("/dashboard")
@@ -15,7 +28,7 @@ def dashboard(user:User=Depends(get_current_user),db:Session=Depends(get_db)):
     org=db.get(Organization,user.organization_id);base=[Call.organization_id==user.organization_id,Call.deleted_at.is_(None)];total=db.scalar(select(func.count(Call.id)).where(*base)) or 0;completed=db.scalar(select(func.count(Call.id)).where(*base,Call.status=="completed")) or 0
     avg_duration=float(db.scalar(select(func.coalesce(func.avg(Call.duration_seconds),0)).where(*base)) or 0);revenue=float(db.scalar(select(func.coalesce(func.sum(Call.revenue),0)).where(*base)) or 0);cost=float(db.scalar(select(func.coalesce(func.sum(Call.cost),0)).where(*base)) or 0)
     recent=db.scalars(select(Call).where(*base).order_by(Call.created_at.desc()).limit(8)).all();agents=db.scalar(select(func.count(VoiceAgent.id)).where(VoiceAgent.organization_id==user.organization_id,VoiceAgent.deleted_at.is_(None))) or 0
-    return {"total_calls":total,"completed_calls":completed,"success_rate":round(completed/total*100,1) if total else 0,"average_duration_seconds":round(avg_duration,1),"revenue":revenue,"cost":cost,"voice_credits_seconds":org.voice_credits_seconds if org else 0,"active_agents":agents,"recent_calls":[{"id":c.id,"direction":c.direction,"status":c.status,"to_number":c.to_number,"duration_seconds":c.duration_seconds,"created_at":c.created_at} for c in recent],"system_health":{"api":"healthy","database":"healthy","redis":"healthy"}}
+    return {"total_calls":total,"completed_calls":completed,"success_rate":round(completed/total*100,1) if total else 0,"average_duration_seconds":round(avg_duration,1),"revenue":revenue,"cost":cost,"voice_credits_seconds":org.voice_credits_seconds if org else 0,"active_agents":agents,"recent_calls":[{"id":c.id,"direction":c.direction,"status":c.status,"to_number":c.to_number,"duration_seconds":c.duration_seconds,"created_at":c.created_at} for c in recent],"system_health":_system_health(db)}
 
 
 @router.get("/timeseries")

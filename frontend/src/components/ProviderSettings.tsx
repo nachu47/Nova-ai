@@ -62,7 +62,7 @@ export function ProviderSettings() {
   }
 
   return (
-    <Card className="border-purple-100 bg-white/60 backdrop-blur-xl shadow-sm">
+    <Card className="border-border bg-card/80 backdrop-blur-xl shadow-sm">
       <CardHeader>
         <CardTitle className="text-xl flex items-center gap-2">
           <Shield className="w-5 h-5 text-purple-600" />
@@ -73,54 +73,54 @@ export function ProviderSettings() {
       
       <CardContent>
         {error && (
-          <div className="mb-6 p-4 bg-red-50 text-red-600 rounded-xl border border-red-100 text-sm">
+          <div className="mb-6 p-4 bg-red-50 dark:bg-red-500/10 text-red-600 rounded-xl border border-red-100 dark:border-red-500/30 text-sm">
             {error}
           </div>
         )}
         
         {success && (
-          <div className="mb-6 p-4 bg-green-50 text-green-600 rounded-xl border border-green-100 text-sm">
+          <div className="mb-6 p-4 bg-green-50 dark:bg-green-500/10 text-green-600 rounded-xl border border-green-100 dark:border-green-500/30 text-sm">
             {success}
           </div>
         )}
 
         <form onSubmit={handleSave} className="space-y-6">
           <div className="space-y-4">
-            <h3 className="text-sm font-semibold text-gray-900 border-b pb-2 flex items-center gap-2">
+            <h3 className="text-sm font-semibold text-foreground border-b pb-2 flex items-center gap-2">
               <Phone className="w-4 h-4 text-red-500" /> Twilio
             </h3>
             <div className="grid gap-4 sm:grid-cols-2">
               <div>
-                <label className="block text-xs font-medium text-gray-700 mb-1">Account SID</label>
+                <label className="block text-xs font-medium text-foreground/80 mb-1">Account SID</label>
                 <input
                   type="text"
                   value={twilioSid}
                   onChange={(e) => setTwilioSid(e.target.value)}
-                  className="block w-full px-3 py-2 border border-gray-200 rounded-lg bg-white/50 text-sm"
+                  className="block w-full px-3 py-2 border border-border rounded-lg bg-background/60 text-sm"
                   placeholder="AC..."
                 />
               </div>
               <div>
-                <label className="block text-xs font-medium text-gray-700 mb-1">Default Outbound Phone Number</label>
+                <label className="block text-xs font-medium text-foreground/80 mb-1">Default Outbound Phone Number</label>
                 <input
                   type="text"
                   value={twilioPhone}
                   onChange={(e) => setTwilioPhone(e.target.value)}
-                  className="block w-full px-3 py-2 border border-gray-200 rounded-lg bg-white/50 text-sm"
+                  className="block w-full px-3 py-2 border border-border rounded-lg bg-background/60 text-sm"
                   placeholder="+1234567890"
                 />
               </div>
               <div className="sm:col-span-2">
-                <label className="block text-xs font-medium text-gray-700 mb-1">Auth Token (Encrypted)</label>
+                <label className="block text-xs font-medium text-foreground/80 mb-1">Auth Token (Encrypted)</label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <Key className="h-3 w-3 text-gray-400" />
+                    <Key className="h-3 w-3 text-muted-foreground/70" />
                   </div>
                   <input
                     type="password"
                     value={twilioToken}
                     onChange={(e) => setTwilioToken(e.target.value)}
-                    className="block w-full pl-9 pr-3 py-2 border border-gray-200 rounded-lg bg-white/50 text-sm"
+                    className="block w-full pl-9 pr-3 py-2 border border-border rounded-lg bg-background/60 text-sm"
                     placeholder="Encrypted & hidden"
                   />
                 </div>
@@ -129,20 +129,20 @@ export function ProviderSettings() {
           </div>
 
           <div className="space-y-4 pt-2">
-            <h3 className="text-sm font-semibold text-gray-900 border-b pb-2 flex items-center gap-2">
+            <h3 className="text-sm font-semibold text-foreground border-b pb-2 flex items-center gap-2">
               <Shield className="w-4 h-4 text-emerald-500" /> OpenAI
             </h3>
             <div>
-              <label className="block text-xs font-medium text-gray-700 mb-1">API Key (Encrypted)</label>
+              <label className="block text-xs font-medium text-foreground/80 mb-1">API Key (Encrypted)</label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Key className="h-3 w-3 text-gray-400" />
+                  <Key className="h-3 w-3 text-muted-foreground/70" />
                 </div>
                 <input
                   type="password"
                   value={openaiKey}
                   onChange={(e) => setOpenaiKey(e.target.value)}
-                  className="block w-full pl-9 pr-3 py-2 border border-gray-200 rounded-lg bg-white/50 text-sm"
+                  className="block w-full pl-9 pr-3 py-2 border border-border rounded-lg bg-background/60 text-sm"
                   placeholder="sk-..."
                 />
               </div>

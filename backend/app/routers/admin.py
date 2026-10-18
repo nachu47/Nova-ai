@@ -289,6 +289,8 @@ def suspend_organization(org_id:str,admin:User=AdminUser,db:Session=Depends(get_
     org = db.get(Organization, org_id)
     if not org or org.deleted_at:
         raise HTTPException(status_code=404, detail="Organization not found")
+    if org.id == admin.organization_id:
+        raise HTTPException(status_code=409, detail="You cannot suspend your own organization")
     org.plan = "suspended"
     write_audit(db, action="SUPERADMIN_SUSPEND_ORG", entity_type="organization", entity_id=org.id, organization_id=org.id, actor_id=admin.id, request=None, after={"plan": "suspended"})
     db.commit()
